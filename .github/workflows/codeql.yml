@@ -14,27 +14,22 @@ jobs:
         uses: actions/checkout@v2
 
       - name: "Define download URLs"
+        shell: bash
         run: |
-          $global:CODEQL_BINARIES_URL="https://github.com/github/codeql-cli-binaries/releases/latest/download/codeql-win64.zip"
-          $global:QUERIES_URL="https://github.com/github/codeql/archive/refs/tags/codeql-cli/latest.zip"
-          $global:CODING_STANDARDS_URL="https://github.com/github/codeql-coding-standards/releases/latest/download/code-scanning-cpp-query-pack.zip"
+          CODEQL_BINARIES_URL="https://github.com/github/codeql-cli-binaries/releases/latest/download/codeql-win64.zip"
+          QUERIES_URL="https://github.com/github/codeql/archive/refs/tags/codeql-cli/latest.zip"
+          CODING_STANDARDS_URL="https://github.com/github/codeql-coding-standards/releases/latest/download/code-scanning-cpp-query-pack.zip"
 
-      - name: Download CodeQL Binaries
-        run: |
           echo "Downloading CodeQL Binaries..."
           CODEQL_BINARIES_URL="https://github.com/github/codeql-cli-binaries/releases/latest/download/codeql-win64.zip"
           echo "Downloading from: $CODEQL_BINARIES_URL"
           curl -L -o codeql-win64.zip "$CODEQL_BINARIES_URL"
 
-      - name: Download Queries
-        run: |
           echo "Downloading Queries..."
           QUERIES_URL="https://github.com/github/codeql/archive/refs/tags/codeql-cli/latest.zip"
           echo "Downloading from: $QUERIES_URL"
           curl -L -o codeql-queries.zip "$QUERIES_URL"
 
-      - name: Download Coding Standards
-        run: |
           echo "Downloading Coding Standards..."
           CODING_STANDARDS_URL="https://github.com/github/codeql-coding-standards/releases/latest/download/code-scanning-cpp-query-pack.zip"
           echo "Downloading from: $CODING_STANDARDS_URL"
