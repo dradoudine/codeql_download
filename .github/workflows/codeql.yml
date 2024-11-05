@@ -78,7 +78,7 @@ jobs:
           ls ~/.codeql/packages/codeql 
           echo "runnner "
           ls "/c/Users/runneradmin/.codeql/packages/codeql"
-          7z a -tzip "codeql_cache_packages.zip" "~/.codeql" -r
+          7z a -tzip codeql_cache_packages.zip ~/.codeql/*
         shell: bash
 
       - name: "Delete Existing Release v1"
