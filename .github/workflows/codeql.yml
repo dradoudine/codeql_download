@@ -62,7 +62,7 @@ jobs:
               if [[ $root_directory_count -eq 1 ]]; then
                   # Case 1: Only one root folder (can have recursive folders/files)
                   echo "  └── Case 1: Only one root folder found."
-          		first_directory=$(unzip -Z1 "$zip_file" | grep '/$' | head -n 1)
+          		    first_directory=$(unzip -Z1 "$zip_file" | findstr /R /C:"$")  # Pour Windows
                   unzip -q "$zip_file"
           		mv $first_directory  $base_dir
           
