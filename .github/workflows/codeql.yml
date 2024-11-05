@@ -98,14 +98,5 @@ jobs:
             fi
           # Créer une nouvelle release
           gh release create "$TAG" --title "Release $TAG" --notes "Description of the release."
-        shell: bash
 
-      - name: "Upload CodeQL Zip to Release"
-        run: |
-          echo "Uploading CodeQL archive to release..."
-          release_id=$(echo "$response" | jq -r '.id')
-          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/zip" \
-            --data-binary @"./codeql_cache_packages.zip" \
-            "https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets?name=codeql_cache_packages.zip"
-        shell: bash
+          gh release upload "$TAG" ./codeql_cache_packages.zip --clobber
