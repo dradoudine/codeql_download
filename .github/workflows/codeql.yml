@@ -68,12 +68,12 @@ jobs:
       - name: "Install Dependencies in Coding Standards Packages"
         run: |
           echo "Installing dependencies in cert package..."
-          cd codeql-coding-standards/c/cert/src
+          cd codeql-coding-standards/codeql-coding-standards/c/cert/src
           ../../../../codeql/codeql/codeql.exe pack install --dir .codeql_packages
           cd -
 
           echo "Installing dependencies in common package..."
-          cd codeql-coding-standards/c/common/src
+          cd codeql-coding-standards/codeql-coding-standards/c/common/src
           ../../../../codeql/codeql/codeql.exe pack install --dir .codeql_packages
           cd -
         shell: bash
