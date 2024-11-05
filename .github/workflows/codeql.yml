@@ -75,9 +75,9 @@ jobs:
         run: |
           echo "Archiving installed packages from CodeQL cache..."
           echo "cache "
-          ls ~/.codeql 
+          ls ~/.codeql/packages/codeql 
           echo "runnner "
-          ls "/c/Users/runneradmin/.codeql/packages"
+          ls "/c/Users/runneradmin/.codeql/packages/codeql"
           tar -a -cvf codeql_cache_packages.zip -C  ~/.codeql 
         shell: bash
 
