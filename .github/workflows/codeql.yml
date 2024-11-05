@@ -52,7 +52,7 @@ jobs:
           
               # Afficher le contenu du fichier ZIP
               echo "Contents of $zip_file:"
-              unzip -l "$zip_file"
+              unzip -q -l "$zip_file"
           
               echo "Unzipping $zip_file..."
               # Dézippez dans un répertoire de base
@@ -72,12 +72,12 @@ jobs:
       - name: "Install Dependencies in Coding Standards Packages"
         run: |
           echo "Installing dependencies in cert package..."
-          cd codeql/codeql-coding-standards/cc/cert/src
+          cd codeql/codeql-coding-standards/c/cert/src
           ../../../../codeql/codeql/codeql.exe pack install --dir .codeql_packages
           cd -
 
           echo "Installing dependencies in common package..."
-          cd codeql/codeql-coding-standards/cc/common/src
+          cd codeql/codeql-coding-standards/c/common/src
           ../../../../codeql/codeql/codeql.exe pack install --dir .codeql_packages
           cd -
         shell: bash
