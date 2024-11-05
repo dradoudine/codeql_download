@@ -19,80 +19,27 @@ jobs:
           CODEQL_BINARIES_URL="https://github.com/github/codeql-cli-binaries/releases/latest/download/codeql-win64.zip"
           QUERIES_URL="https://github.com/github/codeql/archive/refs/tags/codeql-cli/latest.zip"
           CODING_STANDARDS_URL="https://github.com/github/codeql-coding-standards/releases/latest/download/code-scanning-cpp-query-pack.zip"
-
+          
           echo "Downloading CodeQL Binaries..."
           CODEQL_BINARIES_URL="https://github.com/github/codeql-cli-binaries/releases/latest/download/codeql-win64.zip"
           echo "Downloading from: $CODEQL_BINARIES_URL"
           curl -s -L -o codeql-win64.zip "$CODEQL_BINARIES_URL"
+          unzip -q codeql-win64.zip codeql
 
           echo "Downloading Queries..."
           QUERIES_URL="https://github.com/github/codeql/archive/refs/tags/codeql-cli/latest.zip"
           echo "Downloading from: $QUERIES_URL"
           curl -s -L -o codeql-queries.zip "$QUERIES_URL"
+          unzip -q codeql-queries.zip
 
           echo "Downloading Coding Standards..."
           CODING_STANDARDS_URL="https://github.com/github/codeql-coding-standards/releases/latest/download/code-scanning-cpp-query-pack.zip"
           echo "Downloading from: $CODING_STANDARDS_URL"
           curl -s -L -o codeql-coding-standards.zip "$CODING_STANDARDS_URL"
-
-      - name: "Unzip CodeQL Files with Rules"
-        run: |
-          # Function to unzip a file based on specified cases
-          unzip_file() {
-              local zip_file="$1"  # The zip file to process
-          	  base_dir="${zip_file%.zip}"
-          
-              echo "===================================="
-              echo "Processing file: $zip_file"
-              
-              # Store the contents of the zip file in the variable 'toto'
-              toto=$(unzip -Z1 "$zip_file")
-          
-              # Extraire le contenu du fichier zip dans un répertoire temporaire
-              unzip -q "$zip_file" -d temp_extraction
-          
-              # Lister les fichiers dans le répertoire temporaire
-              local contents=$(ls temp_extraction)
-              
-              # Compter les répertoires et fichiers
-              root_directory_count=$(find temp_extraction -maxdepth 1 -type d | wc -l)
-              root_file_count=$(find temp_extraction -maxdepth 1 -type f | wc -l)
-
-              # Decision structure based on the counts
-              if [[ $root_directory_count -eq 1 ]]; then
-                  # Case 1: Only one root folder (can have recursive folders/files)
-                  echo "  └── Case 1: Only one root folder found."
-          		    first_directory=$(unzip -Z1 "$zip_file" | findstr /R /C:"$")  # Pour Windows
-                  unzip -q "$zip_file"
-          		mv $first_directory  $base_dir
-          
-              elif [[ $root_file_count -eq 1 && $root_directory_count -eq 0 ]]; then
-                  # Case 2: Only one file at the root (could be a zip file)
-                  echo "  └── Case 2: Only one file found at the root."
-                  single_file=$(echo "$toto" | grep -E '^[^/]+[^/]*$')
-                  
-                  if [[ $single_file == *.zip ]]; then
-                      echo "      └── Extracting nested zip file: $single_file"
-                      unzip -q "$zip_file" .  # Unzip the zip file to the current directory
-          			mv $zip_file ${zip_file%.zip}_ref.zip  # Remove the nested zip after extraction
-          			mv $single_file $zip_file
-                      # Recursive call for the extracted zip file
-                      unzip_file "$zip_file"  # Call function recursively
-                  else
-                      echo "      └── The file is not a zip: $single_file"
-                  fi
-              else
-                  # Case 3: Multiple root folders or files
-                  echo "  └── Case 3: Multiple root folders or files found."
-                  unzip -q "$zip_file" "$base_dir"  # Unzip everything directly to the current directory
-          
-              fi
-          }
-          # Process each .zip file
-          for zip_file in *.zip; do
-              unzip_file "$zip_file"
-          done
-        shell: bash
+          unzip -q codeql-coding-standards.zip -d temp_extraction
+          unzip -q ./temp_extraction/code-scanning-cpp-query-pack.zip codeql-coding-standards
+          mv ./temp_extraction/codeql-coding-standards codeql-coding-standards
+          rm -rf temp_extraction
 
       - name: "Install Dependencies in Coding Standards Packages"
         run: |
