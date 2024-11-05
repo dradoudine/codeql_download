@@ -62,19 +62,19 @@ jobs:
         run: |
           echo "Installing dependencies in cert package..."
           cd codeql-coding-standards/codeql-coding-standards/c/cert/src
-          ../../../../../codeql/codeql/codeql.exe pack install --dir .codeql_packages
+          ../../../../../codeql/codeql/codeql.exe pack install
           cd -
 
           echo "Installing dependencies in common package..."
           cd codeql-coding-standards/codeql-coding-standards/c/common/src
-          ../../../../../codeql/codeql/codeql.exe pack install --dir .codeql_packages
+          ../../../../../codeql/codeql/codeql.exe pack install
           cd -
         shell: bash
 
       - name: "Archive Installed Packages from CodeQL Cache"
         run: |
           echo "Archiving installed packages from CodeQL cache..."
-          zip -r codeql_cache_packages.zip C:/Users/RunnerUser/.codeql/packages
+          zip -r codeql_cache_packages.zip ~/.codeql 
         shell: bash
 
       - name: "Delete Existing Release v1"
