@@ -1,5 +1,7 @@
 name: "Setup and Release CodeQL with Standards and Dependencies"
 
+permissions:
+  contents: write  # Permet d'écrire sur le contenu, y compris la création de releases
 on:
   push:
     branches: [ "main" ]
@@ -98,12 +100,12 @@ jobs:
         shell: bash
 
       - name: "Create New GitHub Release v1"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Creating new release v1..."
-          response=$(curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -d '{"tag_name": "v1", "name": "Release v1", "body": "This release includes updated CodeQL binaries and standards."}' \
-            https://api.github.com/repos/${{ github.repository }}/releases)
-
+          gh release create v1.0.0 --title "Release v1.0.0" --notes "Description of the release."
+  
           echo "Release created: $response"
         shell: bash
 
