@@ -38,6 +38,8 @@ jobs:
           curl -s -L -o codeql-coding-standards.zip "$CODING_STANDARDS_URL"
           unzip -q codeql-coding-standards.zip -d temp_extraction
           unzip -q ./temp_extraction/code-scanning-cpp-query-pack.zip -d codeql-coding-standards
+
+          tree ./
  
       - name: "Install Dependencies in Coding Standards Packages"
         run: |
