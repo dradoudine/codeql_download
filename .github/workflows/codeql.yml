@@ -77,7 +77,7 @@ jobs:
           echo "cache "
           ls ~/.codeql 
           echo "runnner "
-          ls "C:\Users\runneradmin\.codeql\packages"
+          ls "/c/Users/runneradmin/.codeql/packages"
           tar -a -cvf codeql_cache_packages.zip -C  ~/.codeql 
         shell: bash
 
