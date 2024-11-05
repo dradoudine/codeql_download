@@ -54,7 +54,9 @@ jobs:
           
               # Compter les répertoires au niveau racine
               root_directory_count=$(echo "$toto" | grep -E '^[^\\]+\\$' | wc -l)  # Compter les répertoires au niveau racine
+              echo "Contents of $root_directory_count:"
               root_file_count=$(echo "$toto" | grep -E '^[^\\]+[^\\]*$' | wc -l)  # Compter les fichiers au niveau racine
+              echo "Contents of $root_file_count:"
 
               # Decision structure based on the counts
               if [[ $root_directory_count -eq 1 ]]; then
