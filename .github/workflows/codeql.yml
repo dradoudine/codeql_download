@@ -33,7 +33,7 @@ jobs:
           # Verify installations
           tree /? || echo "Tree installed successfully."
           git --version || echo "Git installed successfully."
-          
+
       - name: "Download and unzip"
         shell: bash
         run: |
@@ -60,7 +60,7 @@ jobs:
           unzip -q codeql-coding-standards.zip -d temp_extraction
           unzip -q ./temp_extraction/code-scanning-cpp-query-pack.zip -d codeql-coding-standards
 
-          tree ./
+           tree /F /A /L 2
  
       - name: "Install Dependencies in Coding Standards Packages"
         run: |
