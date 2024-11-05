@@ -74,7 +74,7 @@ jobs:
       - name: "Archive Installed Packages from CodeQL Cache"
         run: |
           echo "Archiving installed packages from CodeQL cache..."
-          zip -r codeql_cache_packages.zip ~/.codeql 
+          tar -a -cvf codeql_cache_packages.zip -C  ~/.codeql 
         shell: bash
 
       - name: "Delete Existing Release v1"
