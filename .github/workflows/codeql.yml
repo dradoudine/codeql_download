@@ -37,31 +37,54 @@ jobs:
 
       - name: "Unzip CodeQL Files with Rules"
         run: |
+          # Function to unzip a file based on specified cases
           unzip_file() {
-              local zip_file="$1"
-              base_dir="${zip_file%.zip}"
+              local zip_file="$1"  # The zip file to process
+          	  base_dir="${zip_file%.zip}"
           
               echo "===================================="
               echo "Processing file: $zip_file"
               
-              # Vérifiez si le fichier ZIP existe
-              if [ ! -f "$zip_file" ]; then
-                  echo "Error: File $zip_file not found."
-                  return 1
-              fi
+              # Store the contents of the zip file in the variable 'toto'
+              toto=$(unzip -Z1 "$zip_file")
           
-              # Afficher le contenu du fichier ZIP
+              # Echo the contents stored in the variable
               echo "Contents of $zip_file:"
-              unzip -q -l "$zip_file"
+              echo "$toto"
           
-              echo "Unzipping $zip_file..."
-              # Dézippez dans un répertoire de base
-              unzip -q "$zip_file" -d "$base_dir"
-              if [ $? -ne 0 ]; then
-                  echo "Error unzipping $zip_file."
-                  return 1
+              # Count root-level directories and files
+              root_directory_count=$(echo "$toto" | grep -E '^[^/]+/$' | wc -l)  # Count root-level directories
+              root_file_count=$(echo "$toto" | grep -E '^[^/]+[^/]*$' | wc -l)  # Count root-level files
+          
+              # Decision structure based on the counts
+              if [[ $root_directory_count -eq 1 ]]; then
+                  # Case 1: Only one root folder (can have recursive folders/files)
+                  echo "  └── Case 1: Only one root folder found."
+          		first_directory=$(unzip -Z1 "$zip_file" | grep '/$' | head -n 1)
+                  unzip -q "$zip_file"
+          		mv $first_directory  $base_dir
+          
+              elif [[ $root_file_count -eq 1 && $root_directory_count -eq 0 ]]; then
+                  # Case 2: Only one file at the root (could be a zip file)
+                  echo "  └── Case 2: Only one file found at the root."
+                  single_file=$(echo "$toto" | grep -E '^[^/]+[^/]*$')
+                  
+                  if [[ $single_file == *.zip ]]; then
+                      echo "      └── Extracting nested zip file: $single_file"
+                      unzip -q "$zip_file" .  # Unzip the zip file to the current directory
+          			mv $zip_file ${zip_file%.zip}_ref.zip  # Remove the nested zip after extraction
+          			mv $single_file $zip_file
+                      # Recursive call for the extracted zip file
+                      unzip_file "$zip_file"  # Call function recursively
+                  else
+                      echo "      └── The file is not a zip: $single_file"
+                  fi
+              else
+                  # Case 3: Multiple root folders or files
+                  echo "  └── Case 3: Multiple root folders or files found."
+                  unzip -q "$zip_file" "$base_dir"  # Unzip everything directly to the current directory
+          
               fi
-              echo "$zip_file unzipped successfully."
           }
           # Process each .zip file
           for zip_file in *.zip; do
