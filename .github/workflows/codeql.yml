@@ -13,7 +13,7 @@ jobs:
       - name: "Checkout Repository"
         uses: actions/checkout@v2
 
-      - name: "Define download URLs"
+      - name: "Download and unzip"
         shell: bash
         run: |
           CODEQL_BINARIES_URL="https://github.com/github/codeql-cli-binaries/releases/latest/download/codeql-win64.zip"
@@ -38,9 +38,7 @@ jobs:
           curl -s -L -o codeql-coding-standards.zip "$CODING_STANDARDS_URL"
           unzip -q codeql-coding-standards.zip -d temp_extraction
           unzip -q ./temp_extraction/code-scanning-cpp-query-pack.zip -d codeql-coding-standards
-          mv ./temp_extraction/codeql-coding-standards codeql-coding-standards
-          rm -rf temp_extraction
-
+ 
       - name: "Install Dependencies in Coding Standards Packages"
         run: |
           echo "Installing dependencies in cert package..."
