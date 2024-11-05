@@ -16,13 +16,6 @@ jobs:
       - name: Install Chocolatey
         shell: pwsh
         run: |
-          # Set the execution policy to allow script execution
-          Set-ExecutionPolicy Bypass -Scope Process -Force
-          
-          # Download and install Chocolatey
-          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-          Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-  
           # Verify Chocolatey installation
           choco --version || echo "Chocolatey installation failed."
 
