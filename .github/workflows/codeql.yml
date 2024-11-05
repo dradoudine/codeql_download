@@ -15,10 +15,9 @@ jobs:
 
       - name: "Define download URLs"
         run: |
-          echo "Setting download URLs for CodeQL and standards"
-          CODEQL_BINARIES_URL="https://github.com/github/codeql-cli-binaries/releases/latest/download/codeql-win64.zip"
-          QUERIES_URL="https://github.com/github/codeql/archive/refs/tags/codeql-cli/latest.zip"
-          CODING_STANDARDS_URL="https://github.com/github/codeql-coding-standards/releases/latest/download/code-scanning-cpp-query-pack.zip"
+          $global:CODEQL_BINARIES_URL="https://github.com/github/codeql-cli-binaries/releases/latest/download/codeql-win64.zip"
+          $global:QUERIES_URL="https://github.com/github/codeql/archive/refs/tags/codeql-cli/latest.zip"
+          $global:CODING_STANDARDS_URL="https://github.com/github/codeql-coding-standards/releases/latest/download/code-scanning-cpp-query-pack.zip"
 
       - name: "Download CodeQL Binaries, Queries, and Coding Standards"
         run: |
@@ -99,32 +98,38 @@ jobs:
           zip -r codeql_cache_packages.zip C:/Users/RunnerUser/.codeql/packages
         shell: bash
 
-      - name: "Create GitHub Release and Upload Zips"
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: "codeql-with-standards-v1.0"  # Change version as needed
-          release_name: "CodeQL with Coding Standards and Dependencies"
-          draft: false
-          prerelease: false
+      - name: "Delete Existing Release v1"
+        id: delete_release
+        run: |
+          echo "Checking for existing release..."
+          existing_release=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/releases/tags/v1 | jq -r '.id')
+          
+          if [ "$existing_release" != "null" ]; then
+            echo "Deleting existing release v1..."
+            curl -X DELETE -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              https://api.github.com/repos/${{ github.repository }}/releases/$existing_release
+          else
+            echo "No existing release v1 found."
+          fi
+        shell: bash
+
+      - name: "Create New GitHub Release v1"
+        run: |
+          echo "Creating new release v1..."
+          response=$(curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -d '{"tag_name": "v1", "name": "Release v1", "body": "This release includes updated CodeQL binaries and standards."}' \
+            https://api.github.com/repos/${{ github.repository }}/releases)
+
+          echo "Release created: $response"
+        shell: bash
 
       - name: "Upload CodeQL Zip to Release"
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: "./codeql_with_standards.zip"
-          asset_name: "codeql_with_standards.zip"
-          asset_content_type: "application/zip"
-
-      - name: "Upload Installed Packages Zip to Release"
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: "./codeql_cache_packages.zip"
-          asset_name: "codeql_cache_packages.zip"
-          asset_content_type: "application/zip"
+        run: |
+          echo "Uploading CodeQL archive to release..."
+          release_id=$(echo "$response" | jq -r '.id')
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/zip" \
+            --data-binary @"./codeql_cache_packages.zip" \
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/$release_id/assets?name=codeql_cache_packages.zip"
+        shell: bash
