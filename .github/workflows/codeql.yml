@@ -1,0 +1,130 @@
+name: "Setup and Release CodeQL with Standards and Dependencies"
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  setup-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v2
+
+      - name: "Define download URLs"
+        run: |
+          echo "Setting download URLs for CodeQL and standards"
+          CODEQL_BINARIES_URL="https://github.com/github/codeql-cli-binaries/releases/latest/download/codeql-win64.zip"
+          QUERIES_URL="https://github.com/github/codeql/archive/refs/tags/codeql-cli/latest.zip"
+          CODING_STANDARDS_URL="https://github.com/github/codeql-coding-standards/releases/latest/download/code-scanning-cpp-query-pack.zip"
+
+      - name: "Download CodeQL Binaries, Queries, and Coding Standards"
+        run: |
+          echo "Downloading CodeQL Binaries..."
+          curl -L "$CODEQL_BINARIES_URL" -o "codeql.zip"
+          
+          echo "Downloading CodeQL Queries..."
+          curl -L "$QUERIES_URL" -o "codeql-cpp.zip"
+
+          echo "Downloading Coding Standards..."
+          curl -L "$CODING_STANDARDS_URL" -o "codeql-coding-standards.zip"
+        shell: bash
+
+      - name: "Unzip CodeQL Files with Rules"
+        run: |
+          unzip_file() {
+              zip_file="$1"
+              base_dir="${zip_file%.zip}"
+              echo "===================================="
+              echo "Processing file: $zip_file"
+
+              # List contents
+              toto=$(unzip -Z1 "$zip_file")
+              root_directory_count=$(echo "$toto" | grep -E '^[^/]+/$' | wc -l)
+              root_file_count=$(echo "$toto" | grep -E '^[^/]+[^/]*$' | wc -l)
+
+              # Case 1: Only one root folder
+              if [[ $root_directory_count -eq 1 ]]; then
+                  echo "  └── Case 1: Only one root folder found."
+                  unzip -q "$zip_file"
+                  first_directory=$(echo "$toto" | grep '/$' | head -n 1)
+                  mv "$first_directory" "$base_dir"
+
+              # Case 2: Only one root file (possibly a nested zip)
+              elif [[ $root_file_count -eq 1 && $root_directory_count -eq 0 ]]; then
+                  echo "  └── Case 2: Only one file found at the root."
+                  single_file=$(echo "$toto" | grep -E '^[^/]+[^/]*$')
+                  if [[ $single_file == *.zip ]]; then
+                      echo "      └── Extracting nested zip file: $single_file"
+                      unzip -q "$zip_file"
+                      mv "$zip_file" "${zip_file%.zip}_ref.zip"
+                      mv "$single_file" "$zip_file"
+                      unzip_file "$zip_file"  # Recursive call
+                  else
+                      echo "      └── The file is not a zip: $single_file"
+                  fi
+
+              # Case 3: Multiple root folders or files
+              else
+                  echo "  └── Case 3: Multiple root folders or files found."
+                  mkdir -p "$base_dir"
+                  unzip -q "$zip_file" -d "$base_dir"
+              fi
+          }
+
+          # Process each .zip file
+          for zip_file in *.zip; do
+              unzip_file "$zip_file"
+          done
+        shell: bash
+
+      - name: "Install Dependencies in Coding Standards Packages"
+        run: |
+          echo "Installing dependencies in cert package..."
+          cd codeql/codeql-coding-standards/cc/cert/src
+          ../../../../codeql/codeql/codeql.exe pack install --dir .codeql_packages
+          cd -
+
+          echo "Installing dependencies in common package..."
+          cd codeql/codeql-coding-standards/cc/common/src
+          ../../../../codeql/codeql/codeql.exe pack install --dir .codeql_packages
+          cd -
+        shell: bash
+
+      - name: "Archive Installed Packages from CodeQL Cache"
+        run: |
+          echo "Archiving installed packages from CodeQL cache..."
+          zip -r codeql_cache_packages.zip C:/Users/RunnerUser/.codeql/packages
+        shell: bash
+
+      - name: "Create GitHub Release and Upload Zips"
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: "codeql-with-standards-v1.0"  # Change version as needed
+          release_name: "CodeQL with Coding Standards and Dependencies"
+          draft: false
+          prerelease: false
+
+      - name: "Upload CodeQL Zip to Release"
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: "./codeql_with_standards.zip"
+          asset_name: "codeql_with_standards.zip"
+          asset_content_type: "application/zip"
+
+      - name: "Upload Installed Packages Zip to Release"
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: "./codeql_cache_packages.zip"
+          asset_name: "codeql_cache_packages.zip"
+          asset_content_type: "application/zip"
