@@ -10,6 +10,18 @@ jobs:
     runs-on: windows-latest
 
     steps:
+      - name: Install Tree using Winget
+        shell: bash
+        run: |
+          echo "Checking for Winget availability..."
+          if ! command -v winget &> /dev/null; then
+            echo "Winget is not available on this runner."
+            exit 1
+          fi
+
+          echo "Installing Tree..."
+          winget install --id=gnuwin32.tree -e --accept-source-agreements --accept-package-agreements
+
       - name: "Checkout Repository"
         uses: actions/checkout@v2
 
