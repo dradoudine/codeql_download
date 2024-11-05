@@ -60,7 +60,7 @@ jobs:
           unzip -q codeql-coding-standards.zip -d temp_extraction
           unzip -q ./temp_extraction/code-scanning-cpp-query-pack.zip -d codeql-coding-standards
 
-           tree /F /A /L 2
+           tree ./ /F /A /L 2
  
       - name: "Install Dependencies in Coding Standards Packages"
         run: |
