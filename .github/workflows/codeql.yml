@@ -20,7 +20,7 @@ jobs:
           choco --version || echo "Chocolatey installation failed."
 
           # Install desired packages
-          choco install tree -y
+          choco install tree 7zip -y
   
           # Verify installations
           tree /? || echo "Tree installed successfully."
@@ -78,7 +78,7 @@ jobs:
           ls ~/.codeql/packages/codeql 
           echo "runnner "
           ls "/c/Users/runneradmin/.codeql/packages/codeql"
-          tar -a -cvf codeql_cache_packages.zip -C  ~/.codeql 
+          7z a -tzip "codeql_cache_packages.zip" " ~/.codeql/*"
         shell: bash
 
       - name: "Delete Existing Release v1"
