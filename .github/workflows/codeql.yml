@@ -83,30 +83,21 @@ jobs:
           7z a -tzip codeql_cache_packages.zip ~/.codeql/*
         shell: bash
 
-      - name: "Delete Existing Release v1"
-        id: delete_release
-        run: |
-          echo "Checking for existing release..."
-          existing_release=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/releases/tags/v1 | jq -r '.id')
-          
-          if [ "$existing_release" != "null" ]; then
-            echo "Deleting existing release v1..."
-            curl -X DELETE -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              https://api.github.com/repos/${{ github.repository }}/releases/$existing_release
-          else
-            echo "No existing release v1 found."
-          fi
-        shell: bash
-
       - name: "Create New GitHub Release v1"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Creating new release v1..."
-          gh release create v1.0.0 --title "Release v1.0.0" --notes "Description of the release."
-  
-          echo "Release created: $response"
+          TAG="v1.0.0"
+
+            # Vérifier si la release existe
+            if gh release view "$TAG" > /dev/null 2>&1; then
+                echo "Release $TAG already exists. Deleting it..."
+                gh release delete "$TAG" --yes  # Supprimer la release existante
+            else
+                echo "Release $TAG does not exist. Creating a new release..."
+            fi
+          # Créer une nouvelle release
+          gh release create "$TAG" --title "Release $TAG" --notes "Description of the release."
         shell: bash
 
       - name: "Upload CodeQL Zip to Release"
