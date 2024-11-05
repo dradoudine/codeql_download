@@ -48,15 +48,15 @@ jobs:
               # Store the contents of the zip file in the variable 'toto'
               toto=$(unzip -Z1 "$zip_file")
           
-              # Echo the contents stored in the variable
-              echo "Contents of $zip_file:"
-              echo "$toto"
+              # Extraire le contenu du fichier zip dans un répertoire temporaire
+              unzip -q "$zip_file" -d temp_extraction
           
-              # Compter les répertoires au niveau racine
-              root_directory_count=$(echo "$toto" | grep -E '^[^\\]+\\$' | wc -l)  # Compter les répertoires au niveau racine
-              echo "Contents of $root_directory_count:"
-              root_file_count=$(echo "$toto" | grep -E '^[^\\]+[^\\]*$' | wc -l)  # Compter les fichiers au niveau racine
-              echo "Contents of $root_file_count:"
+              # Lister les fichiers dans le répertoire temporaire
+              local contents=$(ls temp_extraction)
+              
+              # Compter les répertoires et fichiers
+              root_directory_count=$(find temp_extraction -maxdepth 1 -type d | wc -l)
+              root_file_count=$(find temp_extraction -maxdepth 1 -type f | wc -l)
 
               # Decision structure based on the counts
               if [[ $root_directory_count -eq 1 ]]; then
