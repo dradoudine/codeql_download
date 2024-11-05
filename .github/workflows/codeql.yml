@@ -19,17 +19,26 @@ jobs:
           $global:QUERIES_URL="https://github.com/github/codeql/archive/refs/tags/codeql-cli/latest.zip"
           $global:CODING_STANDARDS_URL="https://github.com/github/codeql-coding-standards/releases/latest/download/code-scanning-cpp-query-pack.zip"
 
-      - name: "Download CodeQL Binaries, Queries, and Coding Standards"
+      - name: Download CodeQL Binaries
         run: |
           echo "Downloading CodeQL Binaries..."
-          curl -L "$CODEQL_BINARIES_URL" -o "codeql.zip"
-          
-          echo "Downloading CodeQL Queries..."
-          curl -L "$QUERIES_URL" -o "codeql-cpp.zip"
+          CODEQL_BINARIES_URL="https://github.com/github/codeql-cli-binaries/releases/latest/download/codeql-win64.zip"
+          echo "Downloading from: $CODEQL_BINARIES_URL"
+          curl -L -o codeql-win64.zip "$CODEQL_BINARIES_URL"
 
+      - name: Download Queries
+        run: |
+          echo "Downloading Queries..."
+          QUERIES_URL="https://github.com/github/codeql/archive/refs/tags/codeql-cli/latest.zip"
+          echo "Downloading from: $QUERIES_URL"
+          curl -L -o codeql-queries.zip "$QUERIES_URL"
+
+      - name: Download Coding Standards
+        run: |
           echo "Downloading Coding Standards..."
-          curl -L "$CODING_STANDARDS_URL" -o "codeql-coding-standards.zip"
-        shell: bash
+          CODING_STANDARDS_URL="https://github.com/github/codeql-coding-standards/releases/latest/download/code-scanning-cpp-query-pack.zip"
+          echo "Downloading from: $CODING_STANDARDS_URL"
+          curl -L -o codeql-coding-standards.zip "$CODING_STANDARDS_URL"
 
       - name: "Unzip CodeQL Files with Rules"
         run: |
