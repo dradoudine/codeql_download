@@ -52,10 +52,10 @@ jobs:
               echo "Contents of $zip_file:"
               echo "$toto"
           
-              # Count root-level directories and files
-              root_directory_count=$(echo "$toto" | grep -E '^[^/]+/$' | wc -l)  # Count root-level directories
-              root_file_count=$(echo "$toto" | grep -E '^[^/]+[^/]*$' | wc -l)  # Count root-level files
-          
+              # Compter les répertoires au niveau racine
+              root_directory_count=$(echo "$toto" | grep -E '^[^\\]+\\$' | wc -l)  # Compter les répertoires au niveau racine
+              root_file_count=$(echo "$toto" | grep -E '^[^\\]+[^\\]*$' | wc -l)  # Compter les fichiers au niveau racine
+
               # Decision structure based on the counts
               if [[ $root_directory_count -eq 1 ]]; then
                   # Case 1: Only one root folder (can have recursive folders/files)
