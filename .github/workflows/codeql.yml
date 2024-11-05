@@ -38,45 +38,31 @@ jobs:
       - name: "Unzip CodeQL Files with Rules"
         run: |
           unzip_file() {
-              zip_file="$1"
+              local zip_file="$1"
               base_dir="${zip_file%.zip}"
+          
               echo "===================================="
               echo "Processing file: $zip_file"
-
-              # List contents
-              toto=$(unzip -Z1 "$zip_file")
-              root_directory_count=$(echo "$toto" | grep -E '^[^/]+/$' | wc -l)
-              root_file_count=$(echo "$toto" | grep -E '^[^/]+[^/]*$' | wc -l)
-
-              # Case 1: Only one root folder
-              if [[ $root_directory_count -eq 1 ]]; then
-                  echo "  └── Case 1: Only one root folder found."
-                  unzip -q "$zip_file"
-                  first_directory=$(echo "$toto" | grep '/$' | head -n 1)
-                  mv "$first_directory" "$base_dir"
-
-              # Case 2: Only one root file (possibly a nested zip)
-              elif [[ $root_file_count -eq 1 && $root_directory_count -eq 0 ]]; then
-                  echo "  └── Case 2: Only one file found at the root."
-                  single_file=$(echo "$toto" | grep -E '^[^/]+[^/]*$')
-                  if [[ $single_file == *.zip ]]; then
-                      echo "      └── Extracting nested zip file: $single_file"
-                      unzip -q "$zip_file"
-                      mv "$zip_file" "${zip_file%.zip}_ref.zip"
-                      mv "$single_file" "$zip_file"
-                      unzip_file "$zip_file"  # Recursive call
-                  else
-                      echo "      └── The file is not a zip: $single_file"
-                  fi
-
-              # Case 3: Multiple root folders or files
-              else
-                  echo "  └── Case 3: Multiple root folders or files found."
-                  mkdir -p "$base_dir"
-                  unzip -q "$zip_file" -d "$base_dir"
+              
+              # Vérifiez si le fichier ZIP existe
+              if [ ! -f "$zip_file" ]; then
+                  echo "Error: File $zip_file not found."
+                  return 1
               fi
+          
+              # Afficher le contenu du fichier ZIP
+              echo "Contents of $zip_file:"
+              unzip -l "$zip_file"
+          
+              echo "Unzipping $zip_file..."
+              # Dézippez dans un répertoire de base
+              unzip -q "$zip_file" -d "$base_dir"
+              if [ $? -ne 0 ]; then
+                  echo "Error unzipping $zip_file."
+                  return 1
+              fi
+              echo "$zip_file unzipped successfully."
           }
-
           # Process each .zip file
           for zip_file in *.zip; do
               unzip_file "$zip_file"
