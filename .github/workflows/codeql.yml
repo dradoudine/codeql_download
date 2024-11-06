@@ -15,17 +15,14 @@ jobs:
       - name: "Checkout Repository"
         uses: actions/checkout@v4
 
-      - name: Install Chocolatey
+      - name: Install 7z
         shell: pwsh
         run: |
           # Verify Chocolatey installation
           choco --version || echo "Chocolatey installation failed."
 
           # Install desired packages
-          choco install tree 7zip -y
-  
-          # Verify installations
-          tree /? || echo "Tree installed successfully."
+          choco install 7zip -y
 
       - name: "Download and unzip"
         shell: bash
@@ -52,13 +49,10 @@ jobs:
           curl -s -L -o codeql-coding-standards.zip "$CODING_STANDARDS_URL"
           unzip -q codeql-coding-standards.zip -d temp_extraction
           unzip -q ./temp_extraction/code-scanning-cpp-query-pack.zip -d codeql-coding-standards
-          echo "############### ROOT"
-          ls ./
-          echo "############### TMPS"
-          ls ./temp_extraction/
-          echo "############### TMPS"
-          ls ./codeql-coding-standards/
-          #tree ./ /F /A /L 2
+
+          rm -rf *.zip
+          7z a -t7z fullInstalls.7z ./*
+
  
       - name: "Install Dependencies in Coding Standards Packages"
         shell: bash
@@ -81,7 +75,7 @@ jobs:
           ls ~/.codeql/packages/codeql 
           echo "runnner "
           ls "/c/Users/runneradmin/.codeql/packages/codeql"
-          7z a -tzip codeql_cache_packages.zip ~/.codeql/*
+          7z a -t7z codeql_cache_packages.7z ~/.codeql/*
 
 
       - name: "Create New GitHub Release v1"
@@ -101,4 +95,4 @@ jobs:
           # Créer une nouvelle release
           gh release create "$TAG" --title "Release $TAG" --notes "Description of the release."
 
-          gh release upload "$TAG" ./codeql_cache_packages.zip --clobber
+          gh release upload "$TAG" ./*.7z --clobber
