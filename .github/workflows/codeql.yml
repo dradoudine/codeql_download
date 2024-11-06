@@ -51,6 +51,7 @@ jobs:
           unzip -q ./temp_extraction/code-scanning-cpp-query-pack.zip -d codeql-coding-standards
 
           rm -rf *.zip
+          rm -rf ./temp_extraction
           7z a -t7z fullInstalls.7z ./*
 
  
