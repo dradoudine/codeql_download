@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: "Checkout Repository"
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install Chocolatey
         shell: pwsh
@@ -61,6 +61,7 @@ jobs:
           #tree ./ /F /A /L 2
  
       - name: "Install Dependencies in Coding Standards Packages"
+        shell: bash
         run: |
           echo "Installing dependencies in cert package..."
           cd codeql-coding-standards/codeql-coding-standards/c/cert/src
@@ -71,9 +72,9 @@ jobs:
           cd codeql-coding-standards/codeql-coding-standards/c/common/src
           ../../../../../codeql/codeql/codeql.exe pack install
           cd -
-        shell: bash
 
       - name: "Archive Installed Packages from CodeQL Cache"
+        shell: bash
         run: |
           echo "Archiving installed packages from CodeQL cache..."
           echo "cache "
@@ -81,11 +82,12 @@ jobs:
           echo "runnner "
           ls "/c/Users/runneradmin/.codeql/packages/codeql"
           7z a -tzip codeql_cache_packages.zip ~/.codeql/*
-        shell: bash
+
 
       - name: "Create New GitHub Release v1"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
         run: |
           TAG="v1.0.0"
 
