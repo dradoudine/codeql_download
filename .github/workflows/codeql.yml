@@ -70,21 +70,15 @@ jobs:
           7z a -t7z codeql_cache_packages.7z ~/.codeql/*
 
 
-      - name: "Create New GitHub Release v1"
+      - name: "Create New GitHub Release with Date"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          TAG="v1.0.0"
-
-            # Vérifier si la release existe
-            if gh release view "$TAG" > /dev/null 2>&1; then
-                echo "Release $TAG already exists. Deleting it..."
-                gh release delete "$TAG" --yes  # Supprimer la release existante
-            else
-                echo "Release $TAG does not exist. Creating a new release..."
-            fi
+          TAG=$(date +%Y_%m_%d)
+          
+          echo "Creating release with tag: $TAG"
           # Créer une nouvelle release
-          gh release create "$TAG" --title "Release $TAG" --notes "Description of the release."
+          gh release create "$TAG" --title "Release $TAG" --notes "CodeQL release for $TAG"
 
           gh release upload "$TAG" ./*.7z --clobber
