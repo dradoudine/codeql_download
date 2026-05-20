@@ -3,8 +3,6 @@ name: "Setup and Release CodeQL with Standards and Dependencies"
 permissions:
   contents: write  # Permet d'écrire sur le contenu, y compris la création de releases
 on:
-  push:
-    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
